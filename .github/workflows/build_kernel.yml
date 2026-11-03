@@ -57,19 +57,15 @@ jobs:
           sed -i 's/#error POSIX_ACL not supported in 3.18 backport/\/\/ posix_acl disabled/g' kernel-src/fs/ext4/inode.c 2>/dev/null || true
 
           # Precise subsystem-scoped include paths (avoids polluting global LINUXINCLUDE and prevents header shadowing)
-          cat << 'EOF' >> kernel-src/drivers/misc/mediatek/Makefile
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/ppm_v1/src/mach/$(MTK_PLATFORM)
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/ppm_v1/inc
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci/$(MTK_PLATFORM)
-subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/conn_md/include
-EOF
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/ppm_v1/src/mach/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/ppm_v1/inc' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/conn_md/include' >> kernel-src/drivers/misc/mediatek/Makefile
 
-          cat << 'EOF' >> kernel-src/drivers/mmc/host/mediatek/mt6797/Makefile
-ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/mt6797
-EOF
+          echo 'ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/mt6797' >> kernel-src/drivers/mmc/host/mediatek/mt6797/Makefile
 
           # Create tools directory structure expected by MTK Makefile
           mkdir -p kernel-src/tools/tools
