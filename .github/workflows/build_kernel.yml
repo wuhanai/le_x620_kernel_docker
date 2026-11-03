@@ -53,6 +53,9 @@ jobs:
           sed -i 's/YYLTYPE yylloc;/extern YYLTYPE yylloc;/g' kernel-src/scripts/dtc/dtc-lexer.l 2>/dev/null || true
           sed -i 's/HOSTCFLAGS   := -Wall/HOSTCFLAGS   := -Wall -fcommon/g' kernel-src/Makefile 2>/dev/null || true
 
+          # Neutralize POSIX_ACL backport error in MTK ext4
+          sed -i 's/#error POSIX_ACL not supported in 3.18 backport/\/\/ posix_acl disabled/g' kernel-src/fs/ext4/inode.c 2>/dev/null || true
+
           # Create tools directory structure expected by MTK Makefile
           mkdir -p kernel-src/tools/tools
           mkdir -p kernel-src/tools/dct
