@@ -21,19 +21,31 @@ jobs:
       - name: Download Google GCC 4.9 Toolchain
         run: |
           echo "[*] Cloning Google prebuilt aarch64-linux-android-4.9 toolchain..."
-          git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 gcc-arm64
+          git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 gcc-arm64 || \
+          git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 --depth=1 gcc-arm64
 
       - name: Download MT6797 Linux 3.18 Source Tree
         run: |
           echo "[*] Cloning MT6797 3.18 kernel source..."
           git clone https://github.com/planet-community/android_kernel_planetcom_mt6797.git --depth=1 kernel-src
 
-      - name: Inject Docker Kernel Configurations
+      - name: Apply Compatibility & Docker Patches
         run: |
+          echo "[*] Fixing modern host build compatibility for kernel 3.18..."
+          # Fix Perl defined(@val) deprecation error in timeconst.pl
+          sed -i 's/defined(@val)/@val/g' kernel-src/kernel/time/timeconst.pl 2>/dev/null || true
+          sed -i 's/defined(@val)/@val/g' kernel-src/kernel/timeconst.pl 2>/dev/null || true
+          
+          # Fix multiple definition of yylloc in scripts/dtc
+          sed -i 's/YYLTYPE yylloc;/extern YYLTYPE yylloc;/g' kernel-src/scripts/dtc/dtc-lexer.lex.c_shipped 2>/dev/null || true
+          sed -i 's/YYLTYPE yylloc;/extern YYLTYPE yylloc;/g' kernel-src/scripts/dtc/dtc-lexer.l 2>/dev/null || true
+
+          # Remove -Werror to prevent warning aborts
+          sed -i 's/-Werror//g' kernel-src/Makefile 2>/dev/null || true
+
+          # Append Docker Kconfig requirements
           echo "[*] Appending Docker Kconfig patch to gemini_defconfig..."
           cat docker_defconfig_patch.cfg >> kernel-src/arch/arm64/configs/gemini_defconfig
-          # Remove -Werror if present to prevent compiler warning aborts
-          sed -i 's/-Werror//g' kernel-src/Makefile 2>/dev/null || true
 
       - name: Compile Kernel Image
         run: |
