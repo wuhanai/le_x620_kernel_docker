@@ -70,6 +70,7 @@ jobs:
           echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/mmp' >> kernel-src/drivers/misc/mediatek/Makefile
           echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
           echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/ext_disp/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/ext_disp/mt6797/Makefile
+          echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/mu3phy' >> kernel-src/drivers/misc/mediatek/mu3phy/Makefile
 
           echo 'ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/mt6797' >> kernel-src/drivers/mmc/host/mediatek/mt6797/Makefile
 
