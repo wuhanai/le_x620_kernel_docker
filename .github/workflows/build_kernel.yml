@@ -64,6 +64,11 @@ jobs:
           echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci' >> kernel-src/drivers/misc/mediatek/Makefile
           echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
           echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/conn_md/include' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/v2' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/v2/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/mmp' >> kernel-src/drivers/misc/mediatek/Makefile
+          echo 'subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)' >> kernel-src/drivers/misc/mediatek/Makefile
 
           echo 'ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/mt6797' >> kernel-src/drivers/mmc/host/mediatek/mt6797/Makefile
 
