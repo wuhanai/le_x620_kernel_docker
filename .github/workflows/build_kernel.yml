@@ -1,0 +1,58 @@
+name: Build LeEco Le 2 (MT6797) Docker Kernel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+            gcc-multilib g++-multilib libc6-dev-i386 libncurses5 libssl-dev bc liblz4-tool libncurses5-dev python2 python3
+
+      - name: Download Google GCC 4.9 Toolchain
+        run: |
+          echo "[*] Cloning Google prebuilt aarch64-linux-android-4.9 toolchain..."
+          git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 gcc-arm64
+
+      - name: Download MT6797 Linux 3.18 Source Tree
+        run: |
+          echo "[*] Cloning MT6797 3.18 kernel source..."
+          git clone https://github.com/planet-community/android_kernel_planetcom_mt6797.git --depth=1 kernel-src
+
+      - name: Inject Docker Kernel Configurations
+        run: |
+          echo "[*] Appending Docker Kconfig patch to gemini_defconfig..."
+          cat docker_defconfig_patch.cfg >> kernel-src/arch/arm64/configs/gemini_defconfig
+          # Remove -Werror if present to prevent compiler warning aborts
+          sed -i 's/-Werror//g' kernel-src/Makefile 2>/dev/null || true
+
+      - name: Compile Kernel Image
+        run: |
+          cd kernel-src
+          export ARCH=arm64
+          export CROSS_COMPILE=$(pwd)/../gcc-arm64/bin/aarch64-linux-android-
+          echo "[*] Generating defconfig..."
+          make gemini_defconfig
+          echo "[*] Compiling Image with $(nproc) threads..."
+          make -j$(nproc) Image
+
+      - name: Assemble boot_docker.img
+        run: |
+          echo "[*] Assembling boot image with extracted le_x620.dtb and ramdisk..."
+          python3 repack_bootimg.py kernel-src/arch/arm64/boot/Image le_x620.dtb ramdisk.cpio.gz boot_docker.img
+          ls -lh boot_docker.img
+
+      - name: Upload boot_docker.img Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot_docker_le_x620
+          path: boot_docker.img
