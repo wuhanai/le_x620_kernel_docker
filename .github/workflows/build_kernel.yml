@@ -62,7 +62,7 @@ jobs:
           sed -i '1s|^.*$|#!/usr/bin/env python|' kernel-src/tools/dct/DrvGen.py 2>/dev/null || true
 
           # Cleanly remove all -Werror and -Werror=... flags without corrupting command line arguments
-          find kernel-src -type f \( -name "Makefile*" -o -name "Kbuild*" \) -exec sed -E -i 's/-Werror\S*//g' {} + 2>/dev/null || true
+          find kernel-src -type f \( -name "Makefile*" -o -name "Kbuild*" \) -exec sed -E -i 's/-Werror[-a-zA-Z0-9_=]*//g' {} + 2>/dev/null || true
 
           # Detect available defconfig
           TARGET_CONFIG="gemini_defconfig"
