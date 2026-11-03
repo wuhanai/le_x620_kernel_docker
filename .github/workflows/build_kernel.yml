@@ -12,18 +12,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Build Dependencies
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: '2.7'
+
+      - name: Install Build Dependencies & 32-bit Multilib
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
-            gcc-multilib g++-multilib libc6-dev-i386 libssl-dev bc liblz4-tool libncurses-dev python3 python3-pip
-          sudo ln -sf /usr/bin/python3 /usr/bin/python 2>/dev/null || true
+            gcc-multilib g++-multilib libc6:i386 libstdc++6:i386 zlib1g:i386 \
+            libssl-dev bc liblz4-tool libncurses-dev gcc-aarch64-linux-gnu
 
       - name: Download Google GCC 4.9 Toolchain
         run: |
           echo "[*] Cloning Google prebuilt aarch64-linux-android-4.9 toolchain..."
           git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 gcc-arm64 || \
           git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 --depth=1 gcc-arm64
+          chmod +x gcc-arm64/bin/* 2>/dev/null || true
 
       - name: Download MT6797 Linux 3.18 Source Tree
         run: |
@@ -41,6 +48,10 @@ jobs:
           sed -i 's/YYLTYPE yylloc;/extern YYLTYPE yylloc;/g' kernel-src/scripts/dtc/dtc-lexer.lex.c_shipped 2>/dev/null || true
           sed -i 's/YYLTYPE yylloc;/extern YYLTYPE yylloc;/g' kernel-src/scripts/dtc/dtc-lexer.l 2>/dev/null || true
           sed -i 's/HOSTCFLAGS   := -Wall/HOSTCFLAGS   := -Wall -fcommon/g' kernel-src/Makefile 2>/dev/null || true
+
+          # Create tools directory structure expected by MTK Makefile
+          mkdir -p kernel-src/tools/tools
+          mkdir -p kernel-src/tools/dct
 
           # Remove -Werror to prevent warning aborts
           sed -i 's/-Werror//g' kernel-src/Makefile 2>/dev/null || true
@@ -66,7 +77,15 @@ jobs:
         run: |
           cd kernel-src
           export ARCH=arm64
-          export CROSS_COMPILE=$(pwd)/../gcc-arm64/bin/aarch64-linux-android-
+          
+          # Determine working cross-compiler
+          if [ -x "../gcc-arm64/bin/aarch64-linux-android-gcc" ]; then
+              export CROSS_COMPILE=$(pwd)/../gcc-arm64/bin/aarch64-linux-android-
+          else
+              echo "[!] Falling back to system aarch64-linux-gnu-"
+              export CROSS_COMPILE=aarch64-linux-gnu-
+          fi
+
           echo "[*] Generating configuration using $TARGET_CONFIG..."
           make "$TARGET_CONFIG" || make defconfig
           
