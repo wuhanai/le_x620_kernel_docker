@@ -63,11 +63,17 @@ jobs:
               content = f.read()
 
           dirs = set()
+          exclude_chips = ['mt6755', 'mt6757', 'mt6735', 'mt6752', 'mt6580', 'mt6795', 'cpufreq_v1', 'cpuidle_v1']
           for root in ['kernel-src/drivers/misc/mediatek', 'kernel-src/drivers/mmc']:
               for dirpath, _, filenames in os.walk(root):
+                  dir_lower = dirpath.lower().replace('\\', '/')
+                  if any(chip in dir_lower for chip in exclude_chips):
+                      continue
                   if any(fn.endswith('.h') for fn in filenames):
-                      rel = os.path.relpath(dirpath, 'kernel-src').replace('\\', '/')
-                      dirs.add(rel)
+                      base = os.path.basename(dirpath).lower()
+                      if 'mt6797' in dir_lower or base in ['inc', 'include', 'mach', 'mt-plat', 'power', 'base']:
+                          rel = os.path.relpath(dirpath, 'kernel-src').replace('\\', '/')
+                          dirs.add(rel)
 
           inc_flags = ' '.join(f'-I$(srctree)/{d}' for d in sorted(dirs))
           patch_line = f'\nLINUXINCLUDE += {inc_flags}\n'
