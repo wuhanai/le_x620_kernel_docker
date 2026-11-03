@@ -74,6 +74,8 @@ jobs:
           echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/uart/mt6797' >> kernel-src/drivers/misc/mediatek/uart/mt6797/Makefile
           echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/uart/mt6797' >> kernel-src/drivers/misc/mediatek/uart/Makefile
           echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/usb11' >> kernel-src/drivers/misc/mediatek/usb11/Makefile
+          echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/video/mt6797/dispsys' >> kernel-src/drivers/misc/mediatek/video/mt6797/dispsys/Makefile
+          echo 'ccflags-y += -I$(srctree)/drivers/misc/mediatek/video/mt6797/videox' >> kernel-src/drivers/misc/mediatek/video/mt6797/videox/Makefile
 
           echo 'ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/mt6797' >> kernel-src/drivers/mmc/host/mediatek/mt6797/Makefile
 
