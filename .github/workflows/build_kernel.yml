@@ -12,18 +12,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 2.7
-        uses: actions/setup-python@v5
-        with:
-          python-version: '2.7'
-
-      - name: Install Build Dependencies & 32-bit Multilib
+      - name: Install Build Dependencies & Python 2.7
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
             gcc-multilib g++-multilib libc6:i386 libstdc++6:i386 zlib1g:i386 \
-            libssl-dev bc liblz4-tool libncurses-dev gcc-aarch64-linux-gnu
+            libssl-dev bc liblz4-tool libncurses-dev gcc-aarch64-linux-gnu python3 python3-pip
+
+          echo "[*] Installing Python 2.7 runtime for MTK legacy scripts..."
+          mkdir -p /tmp/py2 && cd /tmp/py2
+          curl -fsSL -o py2-min.deb http://archive.ubuntu.com/ubuntu/pool/universe/p/python2.7/libpython2.7-minimal_2.7.18-13ubuntu1.2_amd64.deb || true
+          curl -fsSL -o py2-std-min.deb http://archive.ubuntu.com/ubuntu/pool/universe/p/python2.7/python2.7-minimal_2.7.18-13ubuntu1.2_amd64.deb || true
+          curl -fsSL -o libpy2.deb http://archive.ubuntu.com/ubuntu/pool/universe/p/python2.7/libpython2.7-stdlib_2.7.18-13ubuntu1.2_amd64.deb || true
+          curl -fsSL -o py2.deb http://archive.ubuntu.com/ubuntu/pool/universe/p/python2.7/python2.7_2.7.18-13ubuntu1.2_amd64.deb || true
+          sudo dpkg -i *.deb 2>/dev/null || true
+          cd -
+          if [ -x "/usr/bin/python2.7" ]; then
+              sudo ln -sf /usr/bin/python2.7 /usr/bin/python2
+              sudo ln -sf /usr/bin/python2.7 /usr/bin/python
+          else
+              sudo ln -sf /usr/bin/python3 /usr/bin/python
+          fi
+          python --version
 
       - name: Download Google GCC 4.9 Toolchain
         run: |
