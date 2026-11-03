@@ -12,11 +12,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Build Dependencies
+      - name: Install Build Dependencies & PyPy 2.7
         run: |
           sudo apt-get update
           sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
-            libssl-dev bc liblz4-tool libncurses-dev python3 python-is-python3
+            libssl-dev bc liblz4-tool libncurses-dev python3 2to3
+
+          echo "[*] Installing PyPy 2.7 for legacy MTK build scripts..."
+          curl -fsSL https://downloads.python.org/pypy/pypy2.7-v7.3.17-linux64.tar.bz2 | sudo tar -xj -C /usr/local/
+          sudo ln -sf /usr/local/pypy2.7-v7.3.17-linux64/bin/pypy /usr/local/bin/python2
+          sudo ln -sf /usr/local/pypy2.7-v7.3.17-linux64/bin/pypy /usr/local/bin/python
+          python --version
 
       - name: Download LineageOS CM-14.1 GCC 4.9 Toolchain
         run: |
@@ -47,9 +53,11 @@ jobs:
           mkdir -p kernel-src/tools/tools
           mkdir -p kernel-src/tools/dct
 
-          # Remove -Werror to prevent warning aborts
-          sed -i 's/-Werror//g' kernel-src/Makefile 2>/dev/null || true
-          find kernel-src -name Makefile -exec sed -i 's/-Werror//g' {} + 2>/dev/null || true
+          # Cleanly remove -Werror and -Werror=... without corrupting flags
+          find kernel-src -name Makefile -exec sed -E -i 's/-Werror(=[a-zA-Z0-9_-]+)?//g' {} + 2>/dev/null || true
+
+          # Convert MTK dct scripts if needed
+          2to3 -w kernel-src/tools/dct/ 2>/dev/null || true
 
           # Detect available defconfig
           TARGET_CONFIG="gemini_defconfig"
