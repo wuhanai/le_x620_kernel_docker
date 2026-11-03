@@ -56,6 +56,9 @@ jobs:
           # Neutralize POSIX_ACL backport error in MTK ext4
           sed -i 's/#error POSIX_ACL not supported in 3.18 backport/\/\/ posix_acl disabled/g' kernel-src/fs/ext4/inode.c 2>/dev/null || true
 
+          # Add MTK platform include paths to global LINUXINCLUDE
+          sed -i '/export KBUILD_CPPFLAGS.*LINUXINCLUDE/i LINUXINCLUDE += -I$(srctree)/drivers/misc/mediatek/base/power/mt6797 -I$(srctree)/drivers/misc/mediatek/base/power/include -I$(srctree)/drivers/mmc/host/mediatek/mt6797 -I$(srctree)/drivers/misc/mediatek/include -I$(srctree)/drivers/misc/mediatek/include/mt-plat -I$(srctree)/drivers/misc/mediatek/include/mt-plat/mt6797/include -I$(srctree)/drivers/misc/mediatek/include/mt-plat/mt6797/include/mach' kernel-src/Makefile
+
           # Create tools directory structure expected by MTK Makefile
           mkdir -p kernel-src/tools/tools
           mkdir -p kernel-src/tools/dct
